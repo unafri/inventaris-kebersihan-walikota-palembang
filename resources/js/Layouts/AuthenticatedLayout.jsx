@@ -30,20 +30,44 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                {/* Link Manajemen Barang (Hanya Admin) */}
+                                {user.role === "admin" && (
+                                    <NavLink
+                                        href={route("items.index")}
+                                        active={route().current("items.index")}
+                                    >
+                                        Manajemen Barang
+                                    </NavLink>
+                                )}
                                 {}
-                                <NavLink
-                                    href={route("items.index")}
-                                    active={route().current("items.index")}
-                                >
-                                    Barang
-                                </NavLink>
-                                {}
-                                <NavLink
-                                    href={route("users.index")}
-                                    active={route().current("users.index")}
-                                >
-                                    Manajemen Akun
-                                </NavLink>
+                                {user.role === "admin" && (
+                                    <NavLink
+                                        href={route("users.index")}
+                                        active={route().current("users.index")}
+                                    >
+                                        Manajemen Akun
+                                    </NavLink>
+                                )}
+                                {/* Link Pengajuan (Hanya Staff) */}
+                                {user.role === "staff" && (
+                                    <NavLink
+                                        href={route("pengajuan.index")}
+                                        active={route().current(
+                                            "pengajuan.index"
+                                        )}
+                                    >
+                                        Pengajuan Saya
+                                    </NavLink>
+                                )}
+                                {/* Link Persetujuan (Hanya Kabag) */}
+                                {user.role === "kabag" && (
+                                    <NavLink
+                                        href={route("kabag.index")}
+                                        active={route().current("kabag.index")}
+                                    >
+                                        Persetujuan Pengajuan
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 

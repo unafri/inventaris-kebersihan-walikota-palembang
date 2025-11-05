@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pengajuans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('items_id')->constrained('items')->onDelete('cascade');
+            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
             $table->integer('jumlah');
             $table->string('berkas_path')->nullable();
             $table->string('status')->default('pending');

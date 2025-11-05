@@ -7,6 +7,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -66,7 +67,11 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $users = User::findOrFail($id);
+
+        return Inertia::render('Users/Edit', [
+            'user' => $users
+        ]);
     }
 
     /**
@@ -74,7 +79,39 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // 1. Cari user yang akan di-update
+        $user = User::findOrFail($id);
+
+        // 2. Validasi data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            // Validasi 'unique' harus mengabaikan ID user saat ini
+            'nip' => [
+                'nullable', 
+                'string', 
+                'max:255', 
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'ruangan' => 'required|string|max:255',
+            'role' => 'required|string|in:admin,kabag,staff',
+            // Password 'nullable' = boleh kosong. Jika dikosongi, password lama tidak akan berubah.
+            'password' => ['nullable', 'confirmed', Rules\Password::min(8)],
+        ]);
+
+        // 3. Cek apakah password diisi atau tidak
+        if ($request->filled('password')) {
+            // Jika diisi, hash password baru
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        } else {
+            // Jika kosong, hapus 'password' dari data agar tidak meng-update password lama
+            unset($validatedData['password']);
+        }
+
+        // 4. Update data user
+        $user->update($validatedData);
+
+        // 5. Redirect kembali ke halaman index
+        return redirect()->route('users.index');
     }
 
     /**
@@ -82,6 +119,10 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $users = User::findOrFail($id);
+
+        $users->delete();
+
+        return redirect()->route('users.index');
     }
 }
