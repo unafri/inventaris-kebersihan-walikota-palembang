@@ -18,7 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'items',
-            'items/*'
+            'items/*',
+            'users',
+            'users/*',
+            'pengajuan',       // Untuk POST (Staff)
+            'persetujuan-kabag/*', // Untuk PATCH (Kabag)
+            'proses-admin/*'       // Untuk PATCH (Admin)
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

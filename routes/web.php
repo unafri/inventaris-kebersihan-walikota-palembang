@@ -56,6 +56,16 @@ Route::middleware('auth')->group(function () {
     // Aksi untuk Menolak
     Route::patch('/persetujuan-kabag/{id}/tolak', [PengajuanController::class, 'kabagTolak'])
         ->name('kabag.tolak');
+
+    // --- RUTE UNTUK ADMIN PROSES ---
+    
+    // Halaman utama Admin untuk memproses pengajuan
+    Route::get('/proses-admin', [PengajuanController::class, 'adminIndex'])
+        ->name('admin.index');
+
+    // Aksi untuk Memproses (Mengurangi stok & mengubah status)
+    Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
+        ->name('admin.proses');
 });
 
 require __DIR__ . '/auth.php';
