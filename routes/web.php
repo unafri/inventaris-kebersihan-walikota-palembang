@@ -66,6 +66,15 @@ Route::middleware('auth')->group(function () {
     // Aksi untuk Memproses (Mengurangi stok & mengubah status)
     Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
         ->name('admin.proses');
+
+        // --- RUTE UNTUK LAPORAN STOK BULANAN ---
+    // Halaman untuk menampilkan filter
+    Route::get('/laporan/stok', [ItemController::class, 'showLaporanStokPage'])
+        ->name('laporan.stok.page');
+
+    // Aksi untuk men-download laporan
+    Route::get('/laporan/stok/download', [ItemController::class, 'downloadLaporanStok'])
+        ->name('laporan.stok.download');
 });
 
 require __DIR__ . '/auth.php';
