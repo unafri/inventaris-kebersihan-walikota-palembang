@@ -35,6 +35,7 @@ class ItemController extends Controller
         $validatedData = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'stok' => 'required|integer',
+            'harga' => 'required|numeric|min:0',
         ]);
 
         $item = Item::create($validatedData);
@@ -71,6 +72,7 @@ class ItemController extends Controller
             [
                 'nama_barang' => 'required|string|max:255',
                 'stok' => 'required|integer',
+                'harga' => 'required|numeric|min:0',
             ],
             [
                 'nama_barang.required' => 'nama barang harus diisi',

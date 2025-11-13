@@ -10,6 +10,7 @@ export default function Edit({ auth, item }) {
     const { data, setData, put, processing, errors } = useForm({
         nama_barang: item.nama_barang,
         stok: item.stok,
+        harga: item.harga,
     });
 
     // Fungsi untuk menangani submit form
@@ -84,6 +85,28 @@ export default function Edit({ auth, item }) {
                                     {errors.stok && (
                                         <p className="text-red-500 text-xs mt-1">
                                             {errors.stok}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <InputLabel
+                                        htmlFor="harga"
+                                        value="Harga Satuan"
+                                    />
+                                    <TextInput
+                                        id="harga"
+                                        type="number"
+                                        className="mt-1 block w-full"
+                                        value={data.harga} // <-- Nilai dari useForm
+                                        onChange={(e) =>
+                                            setData("harga", e.target.value)
+                                        }
+                                        required
+                                    />
+                                    {errors.harga && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.harga}
                                         </p>
                                     )}
                                 </div>

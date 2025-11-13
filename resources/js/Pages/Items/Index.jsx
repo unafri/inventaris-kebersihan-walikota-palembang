@@ -3,6 +3,7 @@ import { Head, useForm, Link } from "@inertiajs/react";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import PrimaryButton from "@/Components/PrimaryButton";
+import InputError from "@/Components/InputError";
 
 // 'auth' dan 'items' dikirim otomatis dari controller
 export default function Index({ auth, items }) {
@@ -11,6 +12,7 @@ export default function Index({ auth, items }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         nama_barang: "",
         stok: "",
+        harga: "",
     });
 
     // 2. Fungsi untuk menangani submit form
@@ -93,6 +95,28 @@ export default function Index({ auth, items }) {
                                     )}
                                 </div>
 
+                                <div>
+                                    <InputLabel
+                                        htmlFor="harga"
+                                        value="Harga Satuan"
+                                    />
+                                    <TextInput
+                                        id="harga"
+                                        type="number"
+                                        className="mt-1 block w-full"
+                                        value={data.harga}
+                                        onChange={(e) =>
+                                            setData("harga", e.target.value)
+                                        }
+                                        required
+                                    />
+                                    {errors.harga && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.harga}
+                                        </p>
+                                    )}
+                                </div>
+
                                 <div className="flex items-center gap-4">
                                     <PrimaryButton disabled={processing}>
                                         Simpan
@@ -117,6 +141,9 @@ export default function Index({ auth, items }) {
                                         Stok
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Harga
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                         Aksi
                                     </th>
                                 </tr>
@@ -132,6 +159,9 @@ export default function Index({ auth, items }) {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {item.stok}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            Rp{item.harga}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             {/* Tombol Edit */}
