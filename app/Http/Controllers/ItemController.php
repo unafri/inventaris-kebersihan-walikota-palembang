@@ -102,7 +102,6 @@ class ItemController extends Controller
 
     public function showLaporanStokPage()
     {
-        // Kita hanya perlu tampilkan halaman React-nya
         return Inertia::render('Items/LaporanPage');
     }
 
@@ -111,7 +110,7 @@ class ItemController extends Controller
      */
     public function downloadLaporanStok(Request $request)
     {
-        // 1. Validasi input dari form
+        // validasi
         $data = $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2020|max:2099',
@@ -120,14 +119,11 @@ class ItemController extends Controller
         $bulan = $data['bulan'];
         $tahun = $data['tahun'];
 
-        // 2. Siapkan data (Logika persis seperti format CSV)
         $items = Item::all();
         $no = 1;
 
-        // Kita gunakan 'generator function' (yield) agar cepat
+        // generator
         $generator = function() use ($items, $bulan, $tahun, $no) {
-
-            // Hasilkan baris Judul Kolom
             yield [
                 'No' => 'No',
                 'Nama Barang' => 'Nama Barang',
@@ -142,7 +138,6 @@ class ItemController extends Controller
                 'Sisa Persediaan (Jumlah)' => 'Sisa Persediaan (Jumlah)',
             ];
 
-            // Hasilkan baris Data
             foreach ($items as $item) {
                 $pengeluaran_vol = Pengajuan::where('item_id', $item->id)
                     ->where('status', 'Selesai')
@@ -169,10 +164,9 @@ class ItemController extends Controller
             }
         };
 
-        // 3. Buat nama file
         $fileName = "laporan-stok-bulanan-{$bulan}-{$tahun}.xlsx";
 
-        // 4. Download file menggunakan FastExcel
+        // download
         return (new FastExcel($generator()))->download($fileName);
     }
 }

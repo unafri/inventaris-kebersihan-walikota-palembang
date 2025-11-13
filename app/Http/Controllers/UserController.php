@@ -34,23 +34,21 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // Langkah 1: Validasi data
+        // validasi
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'nip' => 'nullable|string|max:255|unique:users', // boleh kosong, tapi jika diisi harus unik
+            'nip' => 'nullable|string|max:255|unique:users',
             'ruangan' => 'required|string|max:255',
-            'role' => 'required|string|in:admin,kabag,staff', // harus salah satu dari 3 ini
-            'password' => ['required', 'confirmed', Rules\Password::min(8)], // 'confirmed' = harus cocok dengan 'password_confirmation'
+            'role' => 'required|string|in:admin,kabag,staff',
+            'password' => ['required', 'confirmed', Rules\Password::min(8)],
         ]);
 
-        // Langkah 2: Enkripsi (Hash) Password
-        // INI SANGAT PENTING! Jangan pernah simpan password sebagai teks biasa.
+        // hash pw
         $validatedData['password'] = Hash::make($validatedData['password']);
 
-        // Langkah 3: Buat user baru di database
+        // create user baru
         User::create($validatedData);
 
-        // Langkah 4: Redirect kembali ke halaman index
         return redirect()->route('users.index');
     }
 
@@ -79,13 +77,11 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // 1. Cari user yang akan di-update
         $user = User::findOrFail($id);
 
-        // 2. Validasi data
+        // validasi
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            // Validasi 'unique' harus mengabaikan ID user saat ini
             'nip' => [
                 'nullable', 
                 'string', 
@@ -94,23 +90,20 @@ class UserController extends Controller
             ],
             'ruangan' => 'required|string|max:255',
             'role' => 'required|string|in:admin,kabag,staff',
-            // Password 'nullable' = boleh kosong. Jika dikosongi, password lama tidak akan berubah.
+            // kalo pw kosong (pake yg lama)
             'password' => ['nullable', 'confirmed', Rules\Password::min(8)],
         ]);
 
-        // 3. Cek apakah password diisi atau tidak
+        // validasi password
         if ($request->filled('password')) {
-            // Jika diisi, hash password baru
             $validatedData['password'] = Hash::make($validatedData['password']);
         } else {
-            // Jika kosong, hapus 'password' dari data agar tidak meng-update password lama
             unset($validatedData['password']);
         }
 
-        // 4. Update data user
+        // update data user
         $user->update($validatedData);
 
-        // 5. Redirect kembali ke halaman index
         return redirect()->route('users.index');
     }
 

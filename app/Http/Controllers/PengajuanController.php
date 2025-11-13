@@ -16,14 +16,11 @@ class PengajuanController extends Controller
     {
         $userId = Auth::id();
 
-        // 2. Ambil data pengajuan HANYA milik user tsb.
-        // 'with('item')' = ambil juga data dari tabel 'items' yang terhubung
         $pengajuans = Pengajuan::where('user_id', $userId)
-                                ->with('item') // Ini disebut "Eager Loading"
+                                ->with('item')
                                 ->orderBy('created_at', 'desc')
                                 ->get();
 
-        // 3. Tampilkan halaman React dan kirim datanya
         return Inertia::render('Pengajuan/Index', [
             'pengajuans' => $pengajuans
         ]);
@@ -59,6 +56,7 @@ class PengajuanController extends Controller
         return redirect()->route('pengajuan.index');
     }
 
+    // Kabag
     public function kabagIndex()
     {
         $pengajuans = Pengajuan::where('status', 'Pending')
@@ -91,52 +89,43 @@ class PengajuanController extends Controller
 
     public function adminIndex()
     {
-        // 1. Ambil semua pengajuan yang statusnya 'Disetujui Kabag'
+        // ambil pengajuan yg disetujui kabag
         $pengajuans = Pengajuan::where('status', 'Disetujui Kabag')
-                                ->with('user', 'item') // Ambil data user & item
+                                ->with('user', 'item')
                                 ->orderBy('created_at', 'asc')
                                 ->get();
 
-        // 2. Tampilkan halaman React 'Admin/Index.jsx'
         return Inertia::render('Admin/Index', [
             'pengajuans' => $pengajuans
         ]);
     }
 
-    /**
-     * Memproses pengajuan (Aksi Admin).
-     */
+    // Admin
     public function adminProses(string $id)
     {
         $pengajuan = Pengajuan::findOrFail($id);
-        $item = $pengajuan->item; // Ambil item yang terhubung
+        $item = $pengajuan->item;
 
-        // 1. Cek Stok Dulu
+        // cek stok
         if ($item->stok < $pengajuan->jumlah) {
-            // Jika stok tidak cukup, redirect kembali dengan pesan error
-            // Pesan ini akan ditangkap oleh Inertia sebagai 'flash message'
             return redirect()->route('admin.index')->with('error', 'Stok barang tidak mencukupi!');
         }
 
-        // 2. Gunakan DB Transaction
-        // Ini memastikan jika salah satu query gagal, semua akan dibatalkan (rollback).
-        // Mencegah stok berkurang TAPI status tidak berubah (atau sebaliknya).
+        // DB Trransaction
         try {
             DB::transaction(function () use ($pengajuan, $item) {
-                // Kurangi stok barang
                 $item->stok -= $pengajuan->jumlah;
                 $item->save();
 
-                // Ubah status pengajuan
+                // ubah status
                 $pengajuan->status = 'Selesai';
                 $pengajuan->save();
             });
         } catch (\Exception $e) {
-            // Jika terjadi error selama transaksi
             return redirect()->route('admin.index')->with('error', 'Gagal memproses pengajuan: ' . $e->getMessage());
         }
 
-        // 3. Jika sukses, redirect kembali
+        // success
         return redirect()->route('admin.index');
     }
 }

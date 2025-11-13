@@ -29,41 +29,40 @@ Route::middleware('auth')->group(function () {
     Route::resource('items', ItemController::class);
     Route::resource('users', UserController::class);
 
-    // --- ROUTING UNTUK PENGAJUAN BARANG ---
+    // ROUTING UNTUK PENGAJUAN BARANG
 
-    // Rute untuk Staff melihat riwayat pengajuannya
+    // staff liat riwayat pengajuan
     Route::get('/pengajuan', [PengajuanController::class, 'index'])
         ->name('pengajuan.index');
 
-    // Rute untuk Staff membuka formulir pengajuan
+    // staff form pengajuan
     Route::get('/pengajuan/create', [PengajuanController::class, 'create'])
         ->name('pengajuan.create');
 
-    // Rute untuk Staff mengirim/menyimpan formulir pengajuan
+    // staff submit form
     Route::post('/pengajuan', [PengajuanController::class, 'store'])
         ->name('pengajuan.store');
 
-    // --- ROUTING UNTUK KABAG ---
+    // ROUTING UNTUK KABAG
     
-    // Halaman utama Kabag (Daftar Persetujuan)
+    // daftar persetujuan kabag
     Route::get('/persetujuan-kabag', [PengajuanController::class, 'kabagIndex'])
         ->name('kabag.index');
 
-    // Aksi untuk Menyetujui
+    // action
     Route::patch('/persetujuan-kabag/{id}/setuju', [PengajuanController::class, 'kabagSetuju'])
         ->name('kabag.setuju');
 
-    // Aksi untuk Menolak
     Route::patch('/persetujuan-kabag/{id}/tolak', [PengajuanController::class, 'kabagTolak'])
         ->name('kabag.tolak');
 
-    // --- RUTE UNTUK ADMIN PROSES ---
+    // RUTE UNTUK ADMIN PROSES
     
-    // Halaman utama Admin untuk memproses pengajuan
+    // proses persetujuan admin
     Route::get('/proses-admin', [PengajuanController::class, 'adminIndex'])
         ->name('admin.index');
 
-    // Aksi untuk Memproses (Mengurangi stok & mengubah status)
+    // process action
     Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
         ->name('admin.proses');
 
