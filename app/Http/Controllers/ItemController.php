@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
 use App\Models\StokMutasi;
-use Rap2hpoutre\FastExcel\FastExcel;
+use App\Exports\StokLaporanExport;
 use App\Models\Item;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -109,12 +109,10 @@ class ItemController extends Controller
         return Inertia::render('Items/LaporanPage');
     }
 
-    /**
-     * Memicu download laporan stok bulanan (menggunakan FastExcel).
-     */
+    // Laporan Stok Bulanan
     public function downloadLaporanStok(Request $request)
     {
-        // validasi
+        // 1. Validasi input (SAMA)
         $data = $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2020|max:2099',
@@ -123,90 +121,24 @@ class ItemController extends Controller
         $bulan = $data['bulan'];
         $tahun = $data['tahun'];
 
-        // rentang tanggal
+        // 2. Tentukan rentang tanggal (SAMA)
         $tanggalAwalBulan = Carbon::create($tahun, $bulan, 1)->startOfMonth();
         $tanggalAkhirBulan = Carbon::create($tahun, $bulan, 1)->endOfMonth();
 
-        // siapkan data
-        $items = Item::all();
-        $no = 1;
+        // 3. Hitung data menggunakan helper function (BARU)
+        $hasil = $this->hitungDataLaporan($tanggalAwalBulan, $tanggalAkhirBulan);
 
-        $generator = function() use ($items, $tanggalAwalBulan, $tanggalAkhirBulan, $no) {
+        // 4. Buat Judul Periode (BARU)
+        // Pastikan locale di config/app.php sudah 'id' agar 'monthName' jadi 'November'
+        $namaBulan = $tanggalAwalBulan->monthName; 
+        $periode = "LAPORAN PERIODE " . strtoupper($namaBulan) . " $tahun";
 
-            // Hasilkan baris Judul Kolom (Kembali ke V1 - 9 Kolom Utama)
-            yield [
-                'No' => 'No',
-                'Nama Barang' => 'Nama Barang',
-                'Stok Awal (Volume)' => 'Stok Awal (Volume)',
-                'Stok Awal (Harga Satuan)' => 'Stok Awal (Harga Satuan)',
-                'Stok Awal (Jumlah)' => 'Stok Awal (Jumlah)',
-                'Pengeluaran (Volume)' => 'Pengeluaran (Volume)',
-                'Pengeluaran (Harga Satuan)' => 'Pengeluaran (Harga Satuan)',
-                'Pengeluaran (Jumlah)' => 'Pengeluaran (Jumlah)',
-                'Sisa Persediaan (Volume)' => 'Sisa Persediaan (Volume)',
-                'Sisa Persediaan (Harga Satuan)' => 'Sisa Persediaan (Harga Satuan)',
-                'Sisa Persediaan (Jumlah)' => 'Sisa Persediaan (Jumlah)',
-            ];
-
-            // baris data
-            foreach ($items as $item) {
-
-                $harga = $item->harga; // Asumsi harga saat ini
-
-                // ---- HITUNG STOK AWAL (Sisa Bulan Lalu) ----
-                $stokAwal_BulanLalu = StokMutasi::where('item_id', $item->id)
-                    ->where('created_at', '<', $tanggalAwalBulan)
-                    ->sum('jumlah');
-
-                // ---- HITUNG BARANG MASUK (Bulan Ini) ----
-                $barangMasuk_BulanIni = StokMutasi::where('item_id', $item->id)
-                    ->where('tipe', 'masuk')
-                    ->whereBetween('created_at', [$tanggalAwalBulan, $tanggalAkhirBulan])
-                    ->sum('jumlah'); // Hasilnya positif (misal +20)
-
-                // ---- HITUNG PENGELUARAN (Bulan Ini) ----
-                $pengeluaran_BulanIni = StokMutasi::where('item_id', $item->id)
-                    ->where('tipe', 'keluar')
-                    ->whereBetween('created_at', [$tanggalAwalBulan, $tanggalAkhirBulan])
-                    ->sum('jumlah'); // Hasilnya negatif (misal -5)
-
-                // ---- HITUNG SISA PERSEDIAAN (Stok Akhir) ----
-                // Ini adalah cara paling akurat dan tidak berubah
-                $stokAkhir = StokMutasi::where('item_id', $item->id)
-                    ->where('created_at', '<=', $tanggalAkhirBulan)
-                    ->sum('jumlah'); // Hasilnya 15
-
-                // --- INI ADALAH LOGIKA GABUNGAN YANG ANDA MINTA ---
-                // Gabungkan Sisa Bulan Lalu + Barang Masuk Bulan Ini
-                $stokAwal_Tampilan = $stokAwal_BulanLalu + $barangMasuk_BulanIni;
-
-                yield [
-                    'No' => $no++,
-                    'Nama Barang' => $item->nama_barang,
-
-                    // --- STOK AWAL (Gabungan) ---
-                    'Stok Awal (Volume)' => $stokAwal_Tampilan, // (misal: 0 + 20 = 20)
-                    'Stok Awal (Harga Satuan)' => $harga,
-                    'Stok Awal (Jumlah)' => $stokAwal_Tampilan * $harga,
-
-                    // --- PENGELUARAN ---
-                    'Pengeluaran (Volume)' => abs($pengeluaran_BulanIni), // (misal: 5)
-                    'Pengeluaran (Harga Satuan)' => $harga,
-                    'Pengeluaran (Jumlah)' => abs($pengeluaran_BulanIni) * $harga,
-
-                    // --- SISA PERSEDIAAN ---
-                    'Sisa Persediaan (Volume)' => $stokAkhir, // (misal: 15)
-                    'Sisa Persediaan (Harga Satuan)' => $harga,
-                    'Sisa Persediaan (Jumlah)' => $stokAkhir * $harga,
-                ];
-            }
-        };
-
-        // nama file
+        // 5. Buat nama file (SAMA)
         $fileName = "laporan-stok-bulanan-{$bulan}-{$tahun}.xlsx";
 
-        // download file
-        return (new FastExcel($generator()))->download($fileName);
+        // 6. Download file menggunakan Class Export (BARU)
+        return (new StokLaporanExport($hasil['data'], $hasil['totals'], $periode))
+            ->download($fileName);
     }
 
     public function showStokMasukPage()
@@ -256,7 +188,7 @@ class ItemController extends Controller
 
     public function downloadLaporanSemesteran(Request $request)
     {
-        // 1. Validasi input
+        // 1. Validasi input (SAMA)
         $data = $request->validate([
             'semester' => 'required|integer|in:1,2',
             'tahun' => 'required|integer|min:2020|max:2099',
@@ -265,91 +197,91 @@ class ItemController extends Controller
         $semester = $data['semester'];
         $tahun = $data['tahun'];
 
-        // 2. Tentukan rentang tanggal semester
+        // 2. Tentukan rentang tanggal (SAMA)
         if ($semester == 1) {
-            // Semester 1: 1 Jan - 30 Jun
             $tanggalAwalSemester = Carbon::create($tahun, 1, 1)->startOfMonth();
             $tanggalAkhirSemester = Carbon::create($tahun, 6, 1)->endOfMonth();
         } else {
-            // Semester 2: 1 Jul - 31 Des
             $tanggalAwalSemester = Carbon::create($tahun, 7, 1)->startOfMonth();
             $tanggalAkhirSemester = Carbon::create($tahun, 12, 1)->endOfMonth();
         }
 
-        // 3. Siapkan data (Logika SAMA PERSIS dengan Laporan Bulanan V3)
-        $items = Item::all();
-        $no = 1;
+        // 3. Hitung data menggunakan helper function (BARU)
+        $hasil = $this->hitungDataLaporan($tanggalAwalSemester, $tanggalAkhirSemester);
 
-        $generator = function() use ($items, $tanggalAwalSemester, $tanggalAkhirSemester, $no) {
+        // 4. Buat Judul Periode (BARU)
+        $periode = "LAPORAN PERIODE SEMESTER $semester TAHUN $tahun";
 
-            // Hasilkan baris Judul Kolom (SAMA)
-            yield [
-                'No' => 'No',
-                'Nama Barang' => 'Nama Barang',
-                'Stok Awal (Volume)' => 'Stok Awal (Volume)',
-                'Stok Awal (Harga Satuan)' => 'Stok Awal (Harga Satuan)',
-                'Stok Awal (Jumlah)' => 'Stok Awal (Jumlah)',
-                'Pengeluaran (Volume)' => 'Pengeluaran (Volume)',
-                'Pengeluaran (Harga Satuan)' => 'Pengeluaran (Harga Satuan)',
-                'Pengeluaran (Jumlah)' => 'Pengeluaran (Jumlah)',
-                'Sisa Persediaan (Volume)' => 'Sisa Persediaan (Volume)',
-                'Sisa Persediaan (Harga Satuan)' => 'Sisa Persediaan (Harga Satuan)',
-                'Sisa Persediaan (Jumlah)' => 'Sisa Persediaan (Jumlah)',
-            ];
-
-            // Hasilkan baris Data
-            foreach ($items as $item) {
-
-                $harga = $item->harga;
-
-                // ---- HITUNG STOK AWAL (Sisa Semester Lalu) ----
-                $stokAwal_SemesterLalu = StokMutasi::where('item_id', $item->id)
-                    ->where('created_at', '<', $tanggalAwalSemester)
-                    ->sum('jumlah');
-
-                // ---- HITUNG BARANG MASUK (Selama Semester Ini) ----
-                $barangMasuk_SemesterIni = StokMutasi::where('item_id', $item->id)
-                    ->where('tipe', 'masuk')
-                    ->whereBetween('created_at', [$tanggalAwalSemester, $tanggalAkhirSemester])
-                    ->sum('jumlah');
-
-                // ---- HITUNG PENGELUARAN (Selama Semester Ini) ----
-                $pengeluaran_SemesterIni = StokMutasi::where('item_id', $item->id)
-                    ->where('tipe', 'keluar')
-                    ->whereBetween('created_at', [$tanggalAwalSemester, $tanggalAkhirSemester])
-                    ->sum('jumlah');
-
-                // ---- HITUNG SISA PERSEDIAAN (Stok Akhir Semester) ----
-                $stokAkhir = StokMutasi::where('item_id', $item->id)
-                    ->where('created_at', '<=', $tanggalAkhirSemester)
-                    ->sum('jumlah');
-
-                // --- LOGIKA GABUNGAN (Sesuai Permintaan Anda) ---
-                $stokAwal_Tampilan = $stokAwal_SemesterLalu + $barangMasuk_SemesterIni;
-
-                yield [
-                    'No' => $no++,
-                    'Nama Barang' => $item->nama_barang,
-
-                    'Stok Awal (Volume)' => $stokAwal_Tampilan,
-                    'Stok Awal (Harga Satuan)' => $harga,
-                    'Stok Awal (Jumlah)' => $stokAwal_Tampilan * $harga,
-
-                    'Pengeluaran (Volume)' => abs($pengeluaran_SemesterIni),
-                    'Pengeluaran (Harga Satuan)' => $harga,
-                    'Pengeluaran (Jumlah)' => abs($pengeluaran_SemesterIni) * $harga,
-
-                    'Sisa Persediaan (Volume)' => $stokAkhir,
-                    'Sisa Persediaan (Harga Satuan)' => $harga,
-                    'Sisa Persediaan (Jumlah)' => $stokAkhir * $harga,
-                ];
-            }
-        };
-
-        // 4. Buat nama file
+        // 5. Buat nama file (SAMA)
         $fileName = "laporan-stok-semester-{$semester}-{$tahun}.xlsx";
 
-        // 5. Download file
-        return (new FastExcel($generator()))->download($fileName);
+        // 6. Download file menggunakan Class Export (BARU)
+        return (new StokLaporanExport($hasil['data'], $hasil['totals'], $periode))
+            ->download($fileName);
+    }
+
+    private function hitungDataLaporan(Carbon $tanggalAwal, Carbon $tanggalAkhir)
+    {
+        $items = Item::all();
+
+        // Siapkan array kosong untuk menampung data baris
+        $data = [];
+
+        // Siapkan array untuk menampung total di baris paling bawah
+        $totals = [
+            'stokAwal_Tampilan' => 0,
+            'stokAwal_Jumlah' => 0,
+            'pengeluaran_Volume' => 0,
+            'pengeluaran_Jumlah' => 0,
+            'stokAkhir_Volume' => 0,
+            'stokAkhir_Jumlah' => 0,
+        ];
+
+        foreach ($items as $item) {
+            $harga = $item->harga;
+
+            // ---- Lakukan 4 Query Inti ----
+            $stokAwal_BulanLalu = StokMutasi::where('item_id', $item->id)
+                ->where('created_at', '<', $tanggalAwal)
+                ->sum('jumlah');
+
+            $barangMasuk_BulanIni = StokMutasi::where('item_id', $item->id)
+                ->where('tipe', 'masuk')
+                ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+                ->sum('jumlah');
+
+            $pengeluaran_BulanIni = StokMutasi::where('item_id', $item->id)
+                ->where('tipe', 'keluar')
+                ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+                ->sum('jumlah');
+
+            $stokAkhir = StokMutasi::where('item_id', $item->id)
+                ->where('created_at', '<=', $tanggalAkhir)
+                ->sum('jumlah');
+
+            // ---- Lakukan Kalkulasi Tampilan ----
+            $stokAwal_Tampilan = $stokAwal_BulanLalu + $barangMasuk_BulanIni;
+            $pengeluaran_Volume = abs($pengeluaran_BulanIni); // ubah -5 jadi 5
+
+            // ---- Simpan hasil kalkulasi ke array $data ----
+            $data[] = [
+                'nama_barang' => $item->nama_barang,
+                'harga' => $harga,
+                'stokAwal_Tampilan' => $stokAwal_Tampilan,
+                'pengeluaran_Volume' => $pengeluaran_Volume,
+                'stokAkhir' => $stokAkhir,
+            ];
+
+            // ---- Tambahkan ke Total ----
+            $totals['stokAwal_Tampilan'] += $stokAwal_Tampilan;
+            $totals['stokAwal_Jumlah'] += $stokAwal_Tampilan * $harga;
+            $totals['pengeluaran_Volume'] += $pengeluaran_Volume;
+            $totals['pengeluaran_Jumlah'] += $pengeluaran_Volume * $harga;
+            $totals['stokAkhir_Volume'] += $stokAkhir;
+            $totals['stokAkhir_Jumlah'] += $stokAkhir * $harga;
+        }
+
+        // Kembalikan kedua array tersebut
+        return ['data' => $data, 'totals' => $totals];
     }
 }
