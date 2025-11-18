@@ -77,7 +77,7 @@ class ItemController extends Controller
         $validatedData = $request->validate(
             [
                 'nama_barang' => 'required|string|max:255',
-                'stok' => 'required|integer',
+                // 'stok' => 'required|integer',
                 'harga' => 'required|numeric|min:0',
             ],
             [
@@ -109,10 +109,12 @@ class ItemController extends Controller
         return Inertia::render('Items/LaporanPage');
     }
 
-    // Laporan Stok Bulanan
+    /**
+    * Laporan Stok Bulanan
+    **/
     public function downloadLaporanStok(Request $request)
     {
-        // 1. Validasi input (SAMA)
+        // validasi input
         $data = $request->validate([
             'bulan' => 'required|integer|min:1|max:12',
             'tahun' => 'required|integer|min:2020|max:2099',
@@ -121,22 +123,19 @@ class ItemController extends Controller
         $bulan = $data['bulan'];
         $tahun = $data['tahun'];
 
-        // 2. Tentukan rentang tanggal (SAMA)
+        // rentang tanggal
         $tanggalAwalBulan = Carbon::create($tahun, $bulan, 1)->startOfMonth();
         $tanggalAkhirBulan = Carbon::create($tahun, $bulan, 1)->endOfMonth();
 
-        // 3. Hitung data menggunakan helper function (BARU)
+        // hitung data
         $hasil = $this->hitungDataLaporan($tanggalAwalBulan, $tanggalAkhirBulan);
 
-        // 4. Buat Judul Periode (BARU)
-        // Pastikan locale di config/app.php sudah 'id' agar 'monthName' jadi 'November'
+        // judul periode
         $namaBulan = $tanggalAwalBulan->monthName; 
         $periode = "LAPORAN PERIODE " . strtoupper($namaBulan) . " $tahun";
 
-        // 5. Buat nama file (SAMA)
         $fileName = "laporan-stok-bulanan-{$bulan}-{$tahun}.xlsx";
 
-        // 6. Download file menggunakan Class Export (BARU)
         return (new StokLaporanExport($hasil['data'], $hasil['totals'], $periode))
             ->download($fileName);
     }

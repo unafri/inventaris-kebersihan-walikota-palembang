@@ -56,7 +56,8 @@ export default function AuthenticatedLayout({ header, children }) {
                                         Proses Pengajuan
                                     </NavLink>
                                 )}
-                                {user.role === "admin" && (
+                                {(user.role === "admin" ||
+                                    user.role === "kabag") && (
                                     <NavLink
                                         href={route("laporan.stok.page")}
                                         active={route().current(

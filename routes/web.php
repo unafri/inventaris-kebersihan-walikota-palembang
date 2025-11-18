@@ -26,63 +26,69 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('items', ItemController::class);
-    Route::resource('users', UserController::class);
+    // STAFF ROUTE
+    Route::middleware('role:staff')->group(function() {
+        // list pengajuan
+        Route::get('/pengajuan', [PengajuanController::class, 'index'])
+            ->name('pengajuan.index');
 
-    // ROUTING UNTUK PENGAJUAN BARANG
+        // form pengajuan
+        Route::get('/pengajuan/create', [PengajuanController::class, 'create'])
+            ->name('pengajuan.create');
 
-    // staff liat riwayat pengajuan
-    Route::get('/pengajuan', [PengajuanController::class, 'index'])
-        ->name('pengajuan.index');
+        // submit form
+        Route::post('/pengajuan', [PengajuanController::class, 'store'])
+            ->name('pengajuan.store');
+    });
 
-    // staff form pengajuan
-    Route::get('/pengajuan/create', [PengajuanController::class, 'create'])
-        ->name('pengajuan.create');
+    // KABAG ROUTE
+    Route::middleware('role:kabag')->group(function() {
+        // daftar persetujuan kabag
+        Route::get('/persetujuan-kabag', [PengajuanController::class, 'kabagIndex'])
+            ->name('kabag.index');
 
-    // staff submit form
-    Route::post('/pengajuan', [PengajuanController::class, 'store'])
-        ->name('pengajuan.store');
+        // action
+        Route::patch('/persetujuan-kabag/{id}/setuju', [PengajuanController::class, 'kabagSetuju'])
+            ->name('kabag.setuju');
 
-    // ROUTING UNTUK KABAG
-    
-    // daftar persetujuan kabag
-    Route::get('/persetujuan-kabag', [PengajuanController::class, 'kabagIndex'])
-        ->name('kabag.index');
+        Route::patch('/persetujuan-kabag/{id}/tolak', [PengajuanController::class, 'kabagTolak'])
+            ->name('kabag.tolak');
+    });
 
-    // action
-    Route::patch('/persetujuan-kabag/{id}/setuju', [PengajuanController::class, 'kabagSetuju'])
-        ->name('kabag.setuju');
+    // ADMIN ROUTE
+    Route::middleware('role:admin')->group(function() {
+        // items dan users
+        Route::resource('items', ItemController::class);
+        Route::resource('users', UserController::class);
 
-    Route::patch('/persetujuan-kabag/{id}/tolak', [PengajuanController::class, 'kabagTolak'])
-        ->name('kabag.tolak');
+        // page persetujuan admin
+        Route::get('/proses-admin', [PengajuanController::class, 'adminIndex'])
+            ->name('admin.index');
 
-    // RUTE UNTUK ADMIN PROSES
-    
-    // proses persetujuan admin
-    Route::get('/proses-admin', [PengajuanController::class, 'adminIndex'])
-        ->name('admin.index');
+        // process action
+        Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
+            ->name('admin.proses');
+        
+        Route::get('/stok-masuk', [ItemController::class, 'showStokMasukPage'])
+            ->name('stok.masuk.page');
 
-    // process action
-    Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
-        ->name('admin.proses');
+        Route::post('/stok-masuk', [ItemController::class, 'storeStokMasuk'])
+            ->name('stok.masuk.store');
+    });
 
-    // --- RUTE UNTUK LAPORAN STOK BULANAN ---
-    // Halaman untuk menampilkan filter
-    Route::get('/laporan/stok', [ItemController::class, 'showLaporanStokPage'])
-        ->name('laporan.stok.page');
+    // ROUTE UNTUK LAPORAN STOK BULANAN
+    Route::middleware('role:admin,kabag')->group(function() {
+        // page laporan
+        Route::get('/laporan/stok', [ItemController::class, 'showLaporanStokPage'])
+            ->name('laporan.stok.page');
 
-    // Aksi untuk men-download laporan
-    Route::get('/laporan/stok/download', [ItemController::class, 'downloadLaporanStok'])
-        ->name('laporan.stok.download');
-    
-    Route::get('/laporan-semesteran-download', [ItemController::class, 'downloadLaporanSemesteran'])
-        ->name('laporan.semesteran');
-
-    Route::get('/stok-masuk', [ItemController::class, 'showStokMasukPage'])
-        ->name('stok.masuk.page');
-
-    Route::post('/stok-masuk', [ItemController::class, 'storeStokMasuk'])
-        ->name('stok.masuk.store');
+        // download
+        Route::get('/laporan/stok/download', [ItemController::class, 'downloadLaporanStok'])
+            ->name('laporan.stok.download');
+        
+        Route::get('/laporan-semesteran-download', [ItemController::class, 'downloadLaporanSemesteran'])
+            ->name('laporan.semesteran');
+    });
 });
 
 require __DIR__ . '/auth.php';
