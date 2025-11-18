@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
         ->name('admin.proses');
 
-        // --- RUTE UNTUK LAPORAN STOK BULANAN ---
+    // --- RUTE UNTUK LAPORAN STOK BULANAN ---
     // Halaman untuk menampilkan filter
     Route::get('/laporan/stok', [ItemController::class, 'showLaporanStokPage'])
         ->name('laporan.stok.page');
@@ -74,6 +74,15 @@ Route::middleware('auth')->group(function () {
     // Aksi untuk men-download laporan
     Route::get('/laporan/stok/download', [ItemController::class, 'downloadLaporanStok'])
         ->name('laporan.stok.download');
+    
+    Route::get('/laporan-semesteran-download', [ItemController::class, 'downloadLaporanSemesteran'])
+        ->name('laporan.semesteran');
+
+    Route::get('/stok-masuk', [ItemController::class, 'showStokMasukPage'])
+        ->name('stok.masuk.page');
+
+    Route::post('/stok-masuk', [ItemController::class, 'storeStokMasuk'])
+        ->name('stok.masuk.store');
 });
 
 require __DIR__ . '/auth.php';

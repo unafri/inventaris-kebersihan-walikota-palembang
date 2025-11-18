@@ -66,6 +66,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                         Laporan Stok
                                     </NavLink>
                                 )}
+
+                                {user.role === "admin" && (
+                                    <NavLink
+                                        href={route("stok.masuk.page")}
+                                        active={route().current(
+                                            "stok.masuk.page"
+                                        )}
+                                    >
+                                        Barang Masuk
+                                    </NavLink>
+                                )}
+
                                 {/* Link Pengajuan (Hanya Staff) */}
                                 {user.role === "staff" && (
                                     <NavLink

@@ -7,6 +7,7 @@ use App\Models\Pengajuan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Item;
+use App\Models\StokMutasi;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -113,13 +114,21 @@ class PengajuanController extends Controller
 
         // DB Trransaction
         try {
-            DB::transaction(function () use ($pengajuan, $item) {
+            DB::transaction(function() use ($pengajuan, $item) {
                 $item->stok -= $pengajuan->jumlah;
                 $item->save();
 
                 // ubah status
                 $pengajuan->status = 'Selesai';
                 $pengajuan->save();
+
+                StokMutasi::create([
+                    'item_id' => $item->id,
+                    'user_id' => Auth::id(),
+                    'jumlah' => -$pengajuan->jumlah,
+                    'tipe' => 'keluar',
+                    'keterangan' => 'Pengajuan ID: ' . $pengajuan->id . ' oleh ' . $pengajuan->user->name,
+                ]);
             });
         } catch (\Exception $e) {
             return redirect()->route('admin.index')->with('error', 'Gagal memproses pengajuan: ' . $e->getMessage());
@@ -128,4 +137,6 @@ class PengajuanController extends Controller
         // success
         return redirect()->route('admin.index');
     }
+
+
 }

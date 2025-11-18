@@ -11,7 +11,6 @@ export default function Index({ auth, items }) {
     // Ini adalah cara React-Inertia mengelola data form
     const { data, setData, post, processing, errors, reset } = useForm({
         nama_barang: "",
-        stok: "",
         harga: "",
     });
 
@@ -72,25 +71,6 @@ export default function Index({ auth, items }) {
                                     {errors.nama_barang && (
                                         <p className="text-red-500 text-xs mt-1">
                                             {errors.nama_barang}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <InputLabel htmlFor="stok" value="Stok" />
-                                    <TextInput
-                                        id="stok"
-                                        type="number"
-                                        className="mt-1 block w-full"
-                                        value={data.stok}
-                                        onChange={(e) =>
-                                            setData("stok", e.target.value)
-                                        }
-                                        required
-                                    />
-                                    {errors.stok && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.stok}
                                         </p>
                                     )}
                                 </div>
