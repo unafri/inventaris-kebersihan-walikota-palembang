@@ -16,6 +16,7 @@ export default function UpdateProfileInformation({
         useForm({
             name: user.name,
             email: user.email,
+            nip: user.nip,
         });
 
     const submit = (e) => {
@@ -67,6 +68,21 @@ export default function UpdateProfileInformation({
                     />
 
                     <InputError className="mt-2" message={errors.email} />
+                </div>
+                
+                <div>
+                    <InputLabel htmlFor="nip" value="NIP" />
+
+                    <TextInput
+                        id="nip"
+                        className="mt-1 block w-full"
+                        value={data.nip}
+                        onChange={(e) => setData('nip', e.target.value)}
+                        required
+                        autoComplete="username"
+                    />
+
+                    <InputError className="mt-2" message={errors.nip} />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

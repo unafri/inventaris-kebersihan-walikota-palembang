@@ -28,7 +28,7 @@ export default function Index({ auth, items }) {
             user={auth.user}
             header={
                 <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    Daftar Barang
+                    Manajemen Barang
                 </h2>
             }
         >

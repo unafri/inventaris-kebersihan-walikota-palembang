@@ -7,12 +7,11 @@ import InputError from "@/Components/InputError";
 
 // 'auth' dan 'items' (daftar barang) dikirim dari controller
 export default function Create({ auth, items }) {
-    // 'useForm' untuk formulir
     const { data, setData, post, processing, errors } = useForm({
-        item_id: "", // Untuk dropdown barang
-        jumlah: "", // Untuk jumlah
-        berkas: null, // Untuk file upload
-        ruangan: auth.user.ruangan, // Ambil dari data user, tidak bisa diubah
+        item_id: "",
+        jumlah: "",
+        berkas: null,
+        ruangan: auth.user.ruangan,
     });
 
     // Fungsi untuk menangani submit form
@@ -48,20 +47,6 @@ export default function Create({ auth, items }) {
                             </header>
 
                             <form onSubmit={submit} className="mt-6 space-y-6">
-                                {/* Ruangan (Read Only) */}
-                                <div>
-                                    <InputLabel
-                                        htmlFor="ruangan"
-                                        value="Ruangan Anda (Otomatis)"
-                                    />
-                                    <TextInput
-                                        id="ruangan"
-                                        className="mt-1 block w-full bg-gray-100"
-                                        value={data.ruangan}
-                                        disabled // Tidak bisa diubah
-                                    />
-                                </div>
-
                                 {/* Dropdown Nama Barang */}
                                 <div>
                                     <InputLabel
@@ -84,8 +69,7 @@ export default function Create({ auth, items }) {
                                                 key={item.id}
                                                 value={item.id}
                                             >
-                                                {item.nama_barang} (Stok:{" "}
-                                                {item.stok})
+                                                {item.nama_barang}
                                             </option>
                                         ))}
                                     </select>
@@ -99,7 +83,7 @@ export default function Create({ auth, items }) {
                                 <div>
                                     <InputLabel
                                         htmlFor="jumlah"
-                                        value="Jumlah"
+                                        value="Jumlah Barang"
                                     />
                                     <TextInput
                                         id="jumlah"
@@ -117,11 +101,25 @@ export default function Create({ auth, items }) {
                                     />
                                 </div>
 
+                                {/* Ruangan (Read Only) */}
+                                <div>
+                                    <InputLabel
+                                        htmlFor="ruangan"
+                                        value="Ruangan (Otomatis)"
+                                    />
+                                    <TextInput
+                                        id="ruangan"
+                                        className="mt-1 block w-full bg-gray-100"
+                                        value={data.ruangan}
+                                        disabled // Tidak bisa diubah
+                                    />
+                                </div>
+
                                 {/* Berkas Pengajuan (File Upload) */}
                                 <div>
                                     <InputLabel
                                         htmlFor="berkas"
-                                        value="Berkas Pendukung (Foto/PDF)"
+                                        value="Berkas Pendukung (Nota Dinas)"
                                     />
                                     <TextInput
                                         id="berkas"

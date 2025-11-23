@@ -82,12 +82,22 @@ export default function AuthenticatedLayout({ header, children }) {
                                 {/* Link Pengajuan (Hanya Staff) */}
                                 {user.role === "staff" && (
                                     <NavLink
+                                        href={route("pengajuan.create")}
+                                        active={route().current(
+                                            "pengajuan.create"
+                                        )}
+                                    >
+                                        Permintaan Barang
+                                    </NavLink>
+                                )}
+                                {user.role === "staff" && (
+                                    <NavLink
                                         href={route("pengajuan.index")}
                                         active={route().current(
                                             "pengajuan.index"
                                         )}
                                     >
-                                        Pengajuan Saya
+                                        Status Pengajuan
                                     </NavLink>
                                 )}
                                 {/* Link Persetujuan (Hanya Kabag) */}

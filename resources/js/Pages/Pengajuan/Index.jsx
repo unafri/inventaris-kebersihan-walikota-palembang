@@ -31,17 +31,13 @@ export default function Index({ auth, pengajuans }) {
                                 Daftar Pengajuan Saya
                             </h3>
 
-                            <Link
-                                href={route("pengajuan.create")}
-                                className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700"
-                            >
-                                Buat Pengajuan Baru
-                            </Link>
-
                             {/* TABEL RIWAYAT */}
                             <table className="min-w-full divide-y divide-gray-200 mt-4">
                                 <thead className="bg-gray-50">
                                     <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            Nomor Ajuan
+                                        </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                             Tgl. Ajuan
                                         </th>
@@ -63,19 +59,21 @@ export default function Index({ auth, pengajuans }) {
                                     {pengajuans.map((p) => (
                                         <tr key={p.id}>
                                             <td className="px-6 py-4 whitespace-nowrap">
+                                                {p.id}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 {new Date(
                                                     p.created_at
                                                 ).toLocaleDateString("id-ID")}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                {hitungLamaAjuan(p.created_at)}
-                                            </td>
-                                            {/* Kita bisa ambil 'nama_barang' karena kita pakai 'with('item')' */}
-                                            <td className="px-6 py-4 whitespace-nowrap">
                                                 {p.item.nama_barang}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {p.jumlah}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {hitungLamaAjuan(p.created_at)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {p.status}
