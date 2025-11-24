@@ -32,13 +32,21 @@ export default function Login({ status, canResetPassword }) {
             )}
 
             <form onSubmit={submit}>
+                <div className="mb-8 text-center">
+                    <h1 className="text-4xl font-semibold mb-1">
+                        Selamat Datang
+                    </h1>
+                    <p>Silahkan Log in untuk masuk ke sistem!</p>
+                </div>
+
                 <div>
-                    <InputLabel htmlFor="email" value="ID / NIP / Email" />
+                    <InputLabel htmlFor="email" value="NIP / Email" />
 
                     <TextInput
                         id="email"
                         type="text"
                         name="email"
+                        placeholder="Masukkan NIP atau Email"
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
@@ -56,6 +64,7 @@ export default function Login({ status, canResetPassword }) {
                         id="password"
                         type="password"
                         name="password"
+                        placeholder="Masukkan Password"
                         value={data.password}
                         className="mt-1 block w-full"
                         autoComplete="current-password"
@@ -75,12 +84,21 @@ export default function Login({ status, canResetPassword }) {
                             }
                         />
                         <span className="ms-2 text-sm text-gray-600">
-                            Remember me
+                            Ingat saya
                         </span>
                     </label>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                <div className="mt-5 flex items-center justify-center">
+                    <PrimaryButton
+                        className="w-full flex justify-center"
+                        disabled={processing}
+                    >
+                        Login
+                    </PrimaryButton>
+                </div>
+
+                <div className="mt-2">
                     {canResetPassword && (
                         <Link
                             href={route("password.request")}
@@ -89,10 +107,6 @@ export default function Login({ status, canResetPassword }) {
                             Forgot your password?
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
             </form>
         </GuestLayout>

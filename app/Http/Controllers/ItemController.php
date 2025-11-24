@@ -140,14 +140,6 @@ class ItemController extends Controller
             ->download($fileName);
     }
 
-    public function showStokMasukPage()
-    {
-        $items = Item::all(); // Ambil daftar barang untuk dropdown
-        return Inertia::render('Items/StokMasukPage', [
-            'items' => $items
-        ]);
-    }
-
     /**
      * Menyimpan data barang masuk & update stok.
      */
@@ -159,7 +151,6 @@ class ItemController extends Controller
             'keterangan' => 'required|string|max:255',
         ]);
 
-        // Gunakan DB Transaction untuk memastikan kedua tabel ter-update
         try {
             DB::transaction(function () use ($data) {
                 // 1. Ambil item-nya

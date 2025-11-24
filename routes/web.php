@@ -70,9 +70,6 @@ Route::middleware('auth')->group(function () {
         // process action
         Route::patch('/proses-admin/{id}/proses', [PengajuanController::class, 'adminProses'])
             ->name('admin.proses');
-        
-        Route::get('/stok-masuk', [ItemController::class, 'showStokMasukPage'])
-            ->name('stok.masuk.page');
 
         Route::post('/stok-masuk', [ItemController::class, 'storeStokMasuk'])
             ->name('stok.masuk.store');
