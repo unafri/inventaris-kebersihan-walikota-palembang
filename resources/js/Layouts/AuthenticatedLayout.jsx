@@ -9,10 +9,10 @@ export default function AuthenticatedLayout({ header, children }) {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-50 flex">
 
             {/* sidebar */}
-            <aside className="w-64 bg-gray-100 border-r shadow-sm shadow-blue-500 border-gray-200 fixed h-full flex flex-col">
+            <aside className="w-64 bg-gray-00 border-r shadow-sm shadow-blue-500 border-gray-200 fixed h-full flex flex-col">
 
                 <div className="p-4 flex items-center gap-3 border-b border-gray-400"> 
                     <Link href="/" className="flex-shrink-0">
@@ -117,23 +117,44 @@ export default function AuthenticatedLayout({ header, children }) {
                 </nav>
 
                 {/* USER DROPDOWN FOOTER */}
-                <div className="absolute bottom-0 w-full border-t p-4 bg-gray-100">
-                    <div className="text-gray-700 font-semibold mb-2">{user.name}</div>
+               <div className="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                    {/* Profile Name */}
+                    <div className="flex items-center gap-3 mb-4">
+                        <span className="material-symbols-outlined text-gray-600 text-3xl">
+                            account_circle
+                        </span>
+                        <div>
+                            <div className="text-gray-800 font-semibold leading-tight">
+                                {user.name}
+                            </div>
+                            <div className="text-gray-500 text-sm">
+                                {user.email}
+                            </div>
+                        </div>
+                    </div>
 
+                    {/* Profile Button */}
                     <Link
                         href={route("profile.edit")}
-                        className="block px-3 py-2 rounded-md text-gray-600 hover:bg-gray-200"
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg
+                                text-gray-700 hover:bg-indigo-100 hover:text-indigo-700
+                                transition-all duration-150"
                     >
-                        Profile
+                        <span className="material-symbols-outlined text-lg">person</span>
+                        <span>Profile</span>
                     </Link>
 
+                    {/* Logout Button */}
                     <Link
                         href={route("logout")}
                         method="post"
                         as="button"
-                        className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100"
+                        className="flex items-center gap-3 px-3 py-2 w-full rounded-lg
+                                text-red-600 hover:bg-red-100 hover:text-red-700
+                                transition-all duration-150 mt-1"
                     >
-                        Log Out
+                        <span className="material-symbols-outlined text-lg">logout</span>
+                        <span>Log Out</span>
                     </Link>
                 </div>
             </aside>
