@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState } from 'react';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -12,6 +13,9 @@ export default function Register() {
         password: '',
         password_confirmation: '',
     });
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
@@ -63,38 +67,70 @@ export default function Register() {
                 <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
+                    <div className="relative mt-1">
+                        <TextInput
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            value={data.password}
+                            className="mt-1 block w-full"
+                            autoComplete="new-password"
+                            onChange={(e) => setData('password', e.target.value)}
+                            required
+                        />
+
+                        <button
+                            type="button"
+                            className="absolute right-0 inset-y-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                        {showPassword ? 
+                            <span className="material-symbols-outlined text-xl">
+                                visibility_off
+                            </span> : 
+                            <span className="material-symbols-outlined text-xl">
+                                visibility
+                            </span>}
+                        </button>
+                    </div>
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
 
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
+                        <InputLabel
+                            htmlFor="password_confirmation"
+                            value="Confirm Password"
+                        />
+                    <div className="relative mt-1">                 
+                        <TextInput
+                            id="password_confirmation"
+                            type={showConfirmPassword ? "text" : "password"}
+                            name="password_confirmation"
+                            value={data.password_confirmation}
+                            className="mt-1 block w-full"
+                            autoComplete="new-password"
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
+                            required
+                        />
+
+                        <button
+                            type="button"
+                            className="absolute right-0 inset-y-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                        {showConfirmPassword ? 
+                            <span className="material-symbols-outlined text-xl">
+                                visibility_off
+                            </span> : 
+                            <span className="material-symbols-outlined text-xl">
+                                visibility
+                            </span>}
+                        </button>
+                    </div>
 
                     <InputError
                         message={errors.password_confirmation}
