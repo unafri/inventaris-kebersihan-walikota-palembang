@@ -1,244 +1,153 @@
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import Dropdown from "@/Components/Dropdown";
 import NavLink from "@/Components/NavLink";
-import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
-
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const [open, setOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
-                            </div>
+        <div className="min-h-screen bg-gray-100 flex">
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route("dashboard")}
-                                    active={route().current("dashboard")}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                {/* Link Manajemen Barang (Hanya Admin) */}
-                                {user.role === "admin" && (
-                                    <NavLink
-                                        href={route("items.index")}
-                                        active={route().current("items.index")}
-                                    >
-                                        Manajemen Barang
-                                    </NavLink>
-                                )}
-                                {}
-                                {user.role === "admin" && (
-                                    <NavLink
-                                        href={route("users.index")}
-                                        active={route().current("users.index")}
-                                    >
-                                        Manajemen Akun
-                                    </NavLink>
-                                )}
-                                {user.role === "admin" && (
-                                    <NavLink
-                                        href={route("admin.index")}
-                                        active={route().current("admin.index")}
-                                    >
-                                        Proses Pengajuan
-                                    </NavLink>
-                                )}
-                                {(user.role === "admin" ||
-                                    user.role === "kabag") && (
-                                    <NavLink
-                                        href={route("laporan.stok.page")}
-                                        active={route().current(
-                                            "laporan.stok.page"
-                                        )}
-                                    >
-                                        Laporan Stok
-                                    </NavLink>
-                                )}
+            {/* sidebar */}
+            <aside className="w-64 bg-gray-100 border-r shadow-sm shadow-blue-500 border-gray-200 fixed h-full flex flex-col">
 
-                                {/* Link Pengajuan (Hanya Staff) */}
-                                {user.role === "staff" && (
-                                    <NavLink
-                                        href={route("pengajuan.create")}
-                                        active={route().current(
-                                            "pengajuan.create"
-                                        )}
-                                    >
-                                        Permintaan Barang
-                                    </NavLink>
-                                )}
-                                {user.role === "staff" && (
-                                    <NavLink
-                                        href={route("pengajuan.index")}
-                                        active={route().current(
-                                            "pengajuan.index"
-                                        )}
-                                    >
-                                        Status Pengajuan
-                                    </NavLink>
-                                )}
-                                {/* Link Persetujuan (Hanya Kabag) */}
-                                {user.role === "kabag" && (
-                                    <NavLink
-                                        href={route("kabag.index")}
-                                        active={route().current("kabag.index")}
-                                    >
-                                        Persetujuan Pengajuan
-                                    </NavLink>
-                                )}
-                            </div>
-                        </div>
+                <div className="p-4 flex items-center gap-3 border-b border-gray-400"> 
+                    <Link href="/" className="flex-shrink-0">
+                        <ApplicationLogo className="h-14 w-auto fill-current text-gray-800" />
+                    </Link>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route("profile.edit")}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route("logout")}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? "inline-flex"
-                                                : "hidden"
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? "inline-flex"
-                                                : "hidden"
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    <span className="text-sm text-blue-500 font-bold leading-tight">
+                        Sistem Pengadaan<br />Distribusi Alat Kebersihan
+                    </span>
                 </div>
 
-                <div
-                    className={
-                        (showingNavigationDropdown ? "block" : "hidden") +
-                        " sm:hidden"
-                    }
-                >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route("dashboard")}
-                            active={route().current("dashboard")}
-                        >
+                <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto">
+
+                    <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                            Main
+                        </p>
+
+                        <NavLink href={route("dashboard")} active={route().current("dashboard")} icon="dashboard">
                             Dashboard
-                        </ResponsiveNavLink>
+                        </NavLink>
                     </div>
 
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
+                    {/* ADMIN MENU */}
+                    {user.role === "admin" && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                                Administrator
+                            </p>
+
+                            <div className="space-y-1">
+                                <NavLink href={route("items.index")} active={route().current("items.index")}>
+                                    Manajemen Barang
+                                </NavLink>
+
+                                <NavLink href={route("users.index")} active={route().current("users.index")}>
+                                    Manajemen Akun
+                                </NavLink>
+
+                                <NavLink href={route("admin.index")} active={route().current("admin.index")}>
+                                    Proses Pengajuan
+                                </NavLink>
                             </div>
                         </div>
+                    )}
 
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route("profile.edit")}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route("logout")}
-                                as="button"
+                    {/* ADMIN + KABAG */}
+                    {(user.role === "admin" || user.role === "kabag") && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                                Laporan
+                            </p>
+
+                            <NavLink
+                                href={route("laporan.stok.page")}
+                                active={route().current("laporan.stok.page")}
                             >
-                                Log Out
-                            </ResponsiveNavLink>
+                                Laporan Stok
+                            </NavLink>
                         </div>
-                    </div>
+                    )}
+
+                    {/* STAFF ONLY */}
+                    {user.role === "staff" && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                                Staff
+                            </p>
+
+                            <div className="space-y-1">
+                                <NavLink
+                                    href={route("pengajuan.create")}
+                                    active={route().current("pengajuan.create")}
+                                    icon="add_shopping_cart"
+                                >
+                                    Permintaan Barang
+                                </NavLink>
+
+                                <NavLink
+                                    href={route("pengajuan.index")}
+                                    active={route().current("pengajuan.index")}
+                                    icon="pending_actions"
+                                >
+                                    Status Pengajuan
+                                </NavLink>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* KABAG */}
+                    {user.role === "kabag" && (
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase mb-2">
+                                Kepala Bagian
+                            </p>
+
+                            <NavLink href={route("kabag.index")} active={route().current("kabag.index")}>
+                                Persetujuan Pengajuan
+                            </NavLink>
+                        </div>
+                    )}
+                </nav>
+
+                {/* USER DROPDOWN FOOTER */}
+                <div className="absolute bottom-0 w-full border-t p-4 bg-gray-100">
+                    <div className="text-gray-700 font-semibold mb-2">{user.name}</div>
+
+                    <Link
+                        href={route("profile.edit")}
+                        className="block px-3 py-2 rounded-md text-gray-600 hover:bg-gray-200"
+                    >
+                        Profile
+                    </Link>
+
+                    <Link
+                        href={route("logout")}
+                        method="post"
+                        as="button"
+                        className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100"
+                    >
+                        Log Out
+                    </Link>
                 </div>
-            </nav>
+            </aside>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
-                    </div>
-                </header>
-            )}
+            {/* MAIN CONTENT AREA */}
+            <div className="flex-1 ml-64">
+                {header && (
+                    <header className="bg-white shadow p-6">
+                        <div className="max-w-7xl">{header}</div>
+                    </header>
+                )}
 
-            <main>{children}</main>
+                <main className="p-6">{children}</main>
+            </div>
         </div>
     );
 }
